@@ -1,28 +1,14 @@
+// index.js
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const sequelize = require('./config/database');
-const storeRoutes = require('./routes/store.routes');
-const authRoutes = require('./routes/auth.routes');
-const User = require('./models/user.model');
-const Store = require('./models/store.model');
+const storeRouter = require('./routes/store.router'); // ตรวจสอบว่าไฟล์นี้มีอยู่
+const authRouter = require('./routes/auth.router'); // ตรวจสอบว่าไฟล์นี้มีอยู่
 
 const app = express();
-app.use(bodyParser.json());
-app.use(cors());
+app.use(express.json());
 
-app.use('/api/stores', storeRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/store', storeRouter);
+app.use('/api/auth', authRouter);  // ใช้ router สำหรับ auth
 
-const PORT = process.env.PORT || 5000;
-
-sequelize.sync()
-  .then(() => {
-    console.log('Database & tables created!');
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.log('Error syncing database: ', err);
-  });
+app.listen(5000, () => {
+  console.log('Server is running on port 5000');
+});

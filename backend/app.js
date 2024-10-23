@@ -2,8 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const sequelize = require('./config/database');
-const storeRoutes = require('./routes/store.routes');
-const authRoutes = require('./routes/auth.routes');
+const storeRoutes = require('./routes/store.router');
+const authRoutes = require('./routes/auth.router');
 const User = require('./models/user.model');
 const Store = require('./models/store.model');
 

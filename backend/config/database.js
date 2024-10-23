@@ -1,22 +1,16 @@
-require("dotenv").config({ path: "./.env" });
-
+// config/database.js
 const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-const sequelize = new Sequelize(process.env.DB, process.env.USER, process.env.PASSWORD, {
-  host: process.env.HOST,
-  dialect: "postgres",
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  protocol: 'postgres',
   dialectOptions: {
     ssl: {
-      require: true, 
-      rejectUnauthorized: false // จำเป็นเพื่อยอมรับใบรับรอง SSL ที่ไม่เชื่อถือ
+      require: true,
+      rejectUnauthorized: false
     }
-  },
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
-  },
+  }
 });
 
 module.exports = sequelize;

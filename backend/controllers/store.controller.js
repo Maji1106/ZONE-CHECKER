@@ -1,64 +1,69 @@
 // controllers/store.controller.js
 const Store = require('../models/store.model');
 
-const createStore = async (req, res) => {
+const getAllStores = async (req, res) => {
   try {
-    const { name, adminId, address, direction, lat, lng, radius } = req.body;
-    if (req.userId !== adminId) return res.status(403).json({ message: 'Unauthorized' });
-
-    const newStore = await Store.create({ name, adminId, address, direction, lat, lng, radius });
-    res.status(201).json({ message: 'Store created successfully', store: newStore });
+    const stores = await Store.findAll();
+    res.status(200).json(stores);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating store', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
-const getAllStores = async (req, res) => {
+const createStore = async (req, res) => {
   try {
-    const stores = await Store.findAll({ where: { adminId: req.userId } });
-    res.status(200).json(stores);
+    const store = await Store.create(req.body);
+    res.status(201).json(store);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching stores', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 const getStoreById = async (req, res) => {
   try {
-    const storeId = req.params.id;
-    const store = await Store.findOne({ where: { id: storeId, adminId: req.userId } });
-    if (!store) return res.status(404).json({ message: 'Store not found' });
-
-    res.status(200).json(store);
+    const store = await Store.findByPk(req.params.id);
+    if (store) {
+      res.status(200).json(store);
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching store', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 const updateStore = async (req, res) => {
   try {
-    const storeId = req.params.id;
-    const { name, adminId, address, direction, lat, lng, radius } = req.body;
-    const store = await Store.findOne({ where: { id: storeId, adminId: req.userId } });
-    if (!store) return res.status(404).json({ message: 'Store not found' });
-
-    await store.update({ name, adminId, address, direction, lat, lng, radius });
-    res.status(200).json({ message: 'Store updated successfully', store });
+    const store = await Store.findByPk(req.params.id);
+    if (store) {
+      await store.update(req.body);
+      res.status(200).json(store);
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
   } catch (error) {
-    res.status(500).json({ message: 'Error updating store', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 const deleteStore = async (req, res) => {
   try {
-    const storeId = req.params.id;
-    const store = await Store.findOne({ where: { id: storeId, adminId: req.userId } });
-    if (!store) return res.status(404).json({ message: 'Store not found' });
-
-    await store.destroy();
-    res.status(200).json({ message: 'Store deleted successfully' });
+    const store = await Store.findByPk(req.params.id);
+    if (store) {
+      await store.destroy();
+      res.status(204).json();
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting store', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { createStore, getAllStores, getStoreById, updateStore, deleteStore };
+module.exports = {
+  getAllStores,
+  createStore,
+  getStoreById,
+  updateStore,
+  deleteStore
+};
