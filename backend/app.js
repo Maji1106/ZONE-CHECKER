@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const sequelize = require('./config/database');
 const storeRoutes = require('./routes/store.routes');
 const authRoutes = require('./routes/auth.routes');
@@ -8,11 +9,12 @@ const Store = require('./models/store.model');
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 app.use('/api/stores', storeRoutes);
 app.use('/api/auth', authRoutes);
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 sequelize.sync()
   .then(() => {

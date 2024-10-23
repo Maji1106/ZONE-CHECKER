@@ -1,29 +1,28 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
-
-const PORT = process.env.PORT || 5000;
-const frontend_url = process.env.FRONTEND_URL;
-
-const stores = require("./store");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const sequelize = require('./config/database');
+const storeRoutes = require('./routes/store.routes');
+const authRoutes = require('./routes/auth.routes');
+const User = require('./models/user.model');
+const Store = require('./models/store.model');
 
 const app = express();
+app.use(bodyParser.json());
+app.use(cors());
 
-const corsOption = {
-  origin: frontend_url,
-};
+app.use('/api/stores', storeRoutes);
+app.use('/api/auth', authRoutes);
 
+const PORT = process.env.PORT || 5000;
 
-app.use(cors(corsOption));
-
-app.get("/api/stores", (req, res) => {
-  res.json(stores);
-});
-
-app.get("/", (req, res) => {
-  res.send("<h1>Welcome to API for Store Delivery Zone Checker</h1>");
-});
-
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+sequelize.sync()
+  .then(() => {
+    console.log('Database & tables created!');
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.log('Error syncing database: ', err);
+  });
