@@ -1,17 +1,12 @@
 // routes/auth.router.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-// ตัวอย่าง route สำหรับการ login
-router.post('/login', (req, res) => {
+// Route สำหรับการลงทะเบียน
+router.post("/register", (req, res) => {
   const { username, password } = req.body;
-
-  // ใส่ logic สำหรับตรวจสอบ username และ password
-  if (username === 'admin' && password === 'password') {
-    res.json({ message: 'Login successful', token: 'exampleToken123' });
-  } else {
-    res.status(401).json({ message: 'Invalid credentials' });
-  }
+  // logic สำหรับการบันทึกผู้ใช้
+  res.json({ message: "User registered successfully" });
 });
 
 module.exports = router;
