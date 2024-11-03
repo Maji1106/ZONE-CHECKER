@@ -1,86 +1,68 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const { Op } = require('sequelize');
-const User = require('../models/user.model');
-const Role = require('../models/role.model'); // ถ้ามี Role model
-const config = require('../config/auth.config');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const db = require("../models");
+const User = db.User;
+const Role = db.Role;
 
-const secret = config.secret || 'your_jwt_secret';
-
-const generateToken = (user) => {
-  return jwt.sign({ id: user.id, username: user.username }, secret, { expiresIn: '1h' });
-};
-
-// Register a new user
 exports.signup = async (req, res) => {
-  const { username, email, password } = req.body;
-  if (!username || !email || !password) {
-    res.status(400).send({ message: "Please provide all required fields" });
-    return;
-  }
-
-  // Prepare user data
-  const newUser = {
-    username,
-    email,
-    password: bcrypt.hashSync(password, 8),
-  };
-
+  const { username, email, password, roleId } = req.body;
   try {
-    const user = await User.create(newUser);
-    if (req.body.roles) {
-      const roles = await Role.findAll({
-        where: {
-          name: {
-            [Op.or]: req.body.roles,
-          },
-        },
-      });
-      await user.setRoles(roles);
-      res.send({ message: "User registered successfully!" });
+    const hashedPassword = await bcrypt.hash(password, 8);
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
+    if (roleId) {
+      const role = await Role.findByPk(roleId);
+      if (role) {
+        await user.setRoles([role]);
+      }
     } else {
-      await user.setRoles([1]);
-      res.send({ message: "User registered successfully!" });
+      const role = await Role.findOne({ where: { name: "user" } });
+      await user.setRoles([role]);
     }
+
+    res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
-    res.status(500).send({ message: error.message || "Something went wrong while registering a new user." });
+    res.status(500).json({ message: "Error registering user", error });
   }
 };
 
-// Login user
 exports.signin = async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) {
-    res.status(400).send({ message: "Please provide username and password" });
-    return;
-  }
-
   try {
-    const user = await User.findOne({ where: { username: username } });
+    const user = await User.findOne({ where: { username } });
     if (!user) {
-      return res.status(404).send({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const passwordIsValid = bcrypt.compareSync(password, user.password);
+    const passwordIsValid = await bcrypt.compare(password, user.password);
     if (!passwordIsValid) {
-      return res.status(401).send({ accessToken: null, message: "Invalid password" });
+      return res.status(401).json({ accessToken: null, message: "Invalid Password!" });
     }
 
-    const token = jwt.sign({ id: user.id }, secret, { expiresIn: 86400 }); // 1 day
+    const token = jwt.sign({ id: user.id }, process.env.SECRET, {
+      expiresIn: 86400 // 24 hours
+    });
+    
+
     const authorities = [];
     const roles = await user.getRoles();
     for (let i = 0; i < roles.length; i++) {
       authorities.push("ROLE_" + roles[i].name.toUpperCase());
     }
 
-    res.status(200).send({
+    res.status(200).json({
       id: user.id,
       username: user.username,
       email: user.email,
       roles: authorities,
-      accessToken: token,
+      accessToken: token
     });
   } catch (error) {
-    res.status(500).send({ message: error.message || "Something went wrong while signing in." });
+    console.error("Error signing in: ", error); // เพิ่มบรรทัดนี้เพื่อตรวจสอบข้อผิดพลาด
+    res.status(500).json({ message: "Error signing in", error });
   }
 };

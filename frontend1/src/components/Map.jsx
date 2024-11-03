@@ -1,4 +1,3 @@
-// src/components/Map.jsx
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
@@ -30,25 +29,13 @@ const selectedStoreIcon = new L.Icon({
   popupAnchor: [0, -40],
 });
 
-function Map() {
+function Map({ stores }) {
   const center = [13.838500199744178, 100.02534412184882];
-  const [stores, setStores] = useState([]);
   const [myLocation, setMylocation] = useState({ lat: "", lng: "" });
   const [selectedStore, setSelectedStore] = useState(null);
   const navigate = useNavigate(); // สร้าง instance ของ navigate
 
   useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const response = await StoreService.getAllStores();
-        if (response.status === 200) {
-          setStores(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching stores:", error);
-      }
-    };
-    fetchStores();
     handlerGetLocation(); // Get location on mount
   }, []);
 

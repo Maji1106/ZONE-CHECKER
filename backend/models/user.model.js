@@ -1,17 +1,41 @@
-// models/user.model.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes } = require("sequelize");
+const sequelize = require("./db");
 
-const User = sequelize.define('User', {
+// Define User Schema
+const User = sequelize.define("user", {
   username: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false
-  }
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  latitude: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  longitude: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
 });
+
+User.sync({ alter: false })
+  .then(() => {
+    console.log("User table created or already exists");
+  })
+  .catch((error) => {
+    console.log("Error creating User table:", error);
+  });
+
 
 module.exports = User;

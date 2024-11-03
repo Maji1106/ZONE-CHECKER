@@ -1,68 +1,38 @@
-// src/pages/Home.jsx
-import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar"; // ตรวจสอบว่าเส้นทางนำเข้าถูกต้อง
-import axios from "axios";
-import Map from "../components/Map"; // นำเข้าคอมโพเนนต์ Map
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../contexts/auth.context';
 
 const Home = () => {
-  const [token, setToken] = useState("");
-  const [stores, setStores] = useState([]); // State สำหรับเก็บข้อมูลร้านค้า
-  const [loading, setLoading] = useState(true); // State สำหรับสถานะการโหลด
-  const [error, setError] = useState(null); // State สำหรับเก็บข้อผิดพลาด
+    const { user } = useAuthContext();
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    // รับ token จาก localStorage
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setToken(storedToken);
-    }
-  }, []);
+    useEffect(() => {
+        if (user) {
+            navigate('/dashboard'); 
+        }
+    }, [user, navigate]);
 
-  useEffect(() => {
-    const fetchStores = async () => {
-      setLoading(true); // ตั้งค่าการโหลดเป็น true ก่อนการเรียก API
-      try {
-        const response = await axios.get("http://localhost:5000/api/stores", {
-          headers: {
-            Authorization: `Bearer ${token}`, // ส่ง token ไปใน headers
-          },
-        });
-        setStores(response.data); // ตั้งค่าร้านค้าที่ดึงมา
-      } catch (error) {
-        console.error("Error fetching stores:", error);
-        setError("Failed to fetch stores."); // เก็บข้อผิดพลาด
-      } finally {
-        setLoading(false); // ตั้งค่าการโหลดเป็น false หลังจากเสร็จ
-      }
-    };
-
-    if (token) {
-      fetchStores();
-    }
-  }, [token]);
-
-  return (
-    <div className="container mx-auto p-4">
-      <Navbar />
-      <h1 className="text-2xl font-bold mb-4"></h1>
-      <Map /> {/* เรียกใช้คอมโพเนนต์ Map ที่นี่ */}
-      {loading && <p>Loading stores...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {stores.length > 0 && (
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold mb-2">รายการร้านค้า</h2>
-          <ul className="list-disc list-inside">
-            {stores.map((store) => (
-              <li key={store.id} className="my-2">
-                {store.name} - {store.location}{" "}
-                {/* แสดงชื่อและที่ตั้งร้านค้า */}
-              </li>
-            ))}
-          </ul>
+    return (
+        <div className="hero min-h-screen bg-gray-800">
+            <div className="hero-overlay bg-opacity-70 bg-black"></div>
+            <div className="hero-content text-neutral-content text-center">
+                <div className="max-w-md">
+                    <h1 className="mb-5 text-6xl font-extrabold text-white drop-shadow-md tracking-wide">
+                        SE Zone
+                    </h1>
+                    <p className="mb-8 text-lg text-gray-300 drop-shadow-sm leading-relaxed">
+                        Track your zones like never before with ZoneChecker! Effortlessly manage, monitor, and optimize your zones in real time. Experience peace of mind with our intuitive platform, designed for accuracy and efficiency.
+                    </p>
+                    <Link 
+                        to="/login" 
+                        className="btn btn-primary btn-lg px-12 py-4 font-semibold rounded-full shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:bg-blue-700 transform hover:shadow-xl"
+                    >
+                        Start 
+                    </Link>
+                </div>
+            </div>
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Home;

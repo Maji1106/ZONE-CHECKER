@@ -1,74 +1,50 @@
-// src/services/Store.services.js
-import axios from "axios";
+import api from "./api";
 
-const API_URL = "http://localhost:5000/api/stores"; // URL สำหรับการเชื่อมต่อกับ API
+const VITE_STORE_API = import.meta.env.VITE_STORE_API;
 
-// ฟังก์ชันสำหรับการดึงข้อมูลร้านค้าทั้งหมด
-const getAllStores = async (token) => {
-  try {
-    const response = await axios.get(API_URL, {
-      headers: {
-        Authorization: `Bearer ${token}`, // ใช้ token ในการยืนยันตัวตน
-      },
-    });
-    return response.data; // คืนค่าข้อมูลร้านค้าจาก API
-  } catch (error) {
-    console.error("Error fetching stores:", error);
-    throw error; // โยนข้อผิดพลาดกลับไปเพื่อให้สามารถจัดการได้ในที่เรียกใช้
-  }
+const getAllStores = async () => {
+    return await api.get(`${VITE_STORE_API}`);
 };
 
-// ฟังก์ชันสำหรับสร้างร้านค้าใหม่
-const createStore = async (storeData, token) => {
-  try {
-    const response = await axios.post(API_URL, storeData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error creating store:", error);
-    throw error;
-  }
+const getStoreById = async (id) => {
+    return await api.get(`${VITE_STORE_API}/${id}`);
 };
 
-// ฟังก์ชันสำหรับการแก้ไขร้านค้า
-const updateStore = async (id, storeData, token) => {
-  try {
-    const response = await axios.put(`${API_URL}/${id}`, storeData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error updating store:", error);
-    throw error;
-  }
+const createStore = async (store) => {
+    return await api.post(`${VITE_STORE_API}`, store);
 };
 
-// ฟังก์ชันสำหรับลบร้านค้า
-const deleteStore = async (id, token) => {
-  try {
-    const response = await axios.delete(`${API_URL}/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error deleting store:", error);
-    throw error;
-  }
+const updateStore = async (id, store) => {
+    try {
+        const response = await api.put(`${VITE_STORE_API}/${id}`, store);
+        console.log("Update response data:", response.data); // ตรวจสอบข้อมูลที่ตอบกลับ
+        return response; // คืนค่าตอบกลับทั้งหมด
+    } catch (error) {
+        console.error("Error updating store:", error);
+        throw error;
+    }
 };
 
-// นำฟังก์ชันไปใช้ในส่วนอื่นๆ ของแอปพลิเคชัน
-export default {
-  getAllStores,
-  createStore,
-  updateStore,
-  deleteStore,
+const deleteStore = async (id) => {
+    try {
+        const response = await api.delete(`${VITE_STORE_API}/${id}`);
+        if (response.status === 200 || response.status === 204) {
+            return response; // Status 200 or 204 means successful deletion
+        } else {
+            throw new Error(`Failed to delete store. Status code: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error deleting store:', error);
+        throw error;
+    }
 };
+
+const StoreService = {
+    getAllStores,
+    getStoreById,
+    createStore,
+    updateStore,
+    deleteStore,
+};
+
+export default StoreService;

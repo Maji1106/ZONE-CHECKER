@@ -1,19 +1,19 @@
-// src/index.jsx
+// src/main.jsx
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Register from './components/Register';
-import Login from './components/Login';
-import './index.css'; // Tailwind CSS
+import { createRoot } from 'react-dom/client';
+import AppRouter from './routes/Router.jsx'; // ตรวจสอบการนำเข้าให้ถูกต้อง
+import './index.css';
+import { StoreProvider } from './contexts/store.context';
+import { AuthProvider } from './contexts/auth.context';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const container = document.getElementById('root');
+const root = createRoot(container);
 root.render(
-  <Router>
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/login" element={<Login />} />
-    </Routes>
-  </Router>
+  <React.StrictMode>
+    <AuthProvider>
+      <StoreProvider>
+        <AppRouter />
+      </StoreProvider>
+    </AuthProvider>
+  </React.StrictMode>
 );
